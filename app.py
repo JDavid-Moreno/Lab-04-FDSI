@@ -6,6 +6,7 @@ NO desplegar en producción ni exponer a internet.
 
 import hashlib
 import os
+import subprocess
 import sqlite3
 
 from flask import Flask, request
@@ -60,9 +61,13 @@ def register():
 def ping():
     host = request.args.get("host", "127.0.0.1")
 
-    # --- Vulnerabilidad 2: Inyección de comandos (os.system con entrada de usuario) ---
-    result = os.system("ping -c 1 " + host)
-    return {"exit_code": result}
+    # --- S-02 CORREGIDO: Uso seguro de subprocess en lugar de os.system ---
+    try:
+        # Ejecutar ping pasando los argumentos como lista para evitar inyección de comandos en shell
+        result = subprocess.run(["ping", "-c", "1", host], capture_output=True, text=True, timeout=5)
+        return {"output": result.stdout, "exit_code": result.returncode}
+    except Exception as e:
+        return {"error": str(e)}
 
 
 @app.route("/files", methods=["GET"])
