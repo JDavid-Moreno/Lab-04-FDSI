@@ -9,12 +9,15 @@ import os
 import subprocess
 import sqlite3
 
-from flask import Flask, request
+from flask import Flask, request, abort
 
 app = Flask(__name__)
 
 # --- S-03 / Vulnerabilidad 3 CORREGIDA: Secreto cargado desde variable de entorno ---
 API_KEY = os.environ.get("API_KEY", "key_no_disponible_en_codigo")
+
+# Directorio seguro permitido para archivos
+UPLOAD_DIR = os.path.abspath("uploads")
 
 
 def get_db():
@@ -45,7 +48,7 @@ def register():
     username = request.form["username"]
     password = request.form["password"]
 
-    # --- S-04 4 CORREGIDA (Hash débil MD5 -> SHA-256) ---
+    # --- Hash débil MD5 -> SHA-256 ---
     hashed = hashlib.sha256(password.encode()).hexdigest()
 
     conn = get_db()
@@ -73,13 +76,20 @@ def ping():
 def read_file():
     filename = request.args.get("name", "readme.txt")
 
-    # --- Vulnerabilidad 6: Path traversal en endpoint de lectura de archivos ---
-    with open("uploads/" + filename, "r") as f:
+    # --- S-06 CORREGIDO: Prevención de Path Traversal mediante os.path.basename y validación de ruta ---
+    safe_filename = os.path.basename(filename)
+    filepath = os.path.normpath(os.path.join(UPLOAD_DIR, safe_filename))
+
+    # Asegurar que el archivo esté estrictamente dentro del directorio autorizado
+    if not filepath.startswith(UPLOAD_DIR) or not os.path.exists(filepath):
+        abort(404)
+
+    with open(filepath, "r") as f:
         content = f.read()
     return {"content": content}
 
 
 if __name__ == "__main__":
-    os.makedirs("uploads", exist_ok=True)
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
     # --- S-04 CORREGIDO: Modo debug desactivado para produccion ---
     app.run(debug=False)
