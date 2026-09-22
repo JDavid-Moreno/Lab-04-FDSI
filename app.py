@@ -45,7 +45,7 @@ def register():
     username = request.form["username"]
     password = request.form["password"]
 
-    # --- Vulnerabilidad 4 CORREGIDA (Hash débil MD5 -> SHA-256) ---
+    # --- S-04 4 CORREGIDA (Hash débil MD5 -> SHA-256) ---
     hashed = hashlib.sha256(password.encode()).hexdigest()
 
     conn = get_db()
@@ -81,4 +81,5 @@ def read_file():
 
 if __name__ == "__main__":
     os.makedirs("uploads", exist_ok=True)
-    app.run(debug=True)
+    # --- S-04 CORREGIDO: Modo debug desactivado para produccion ---
+    app.run(debug=False)
