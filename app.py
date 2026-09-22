@@ -30,7 +30,7 @@ def login():
     password = request.form["password"]
 
     # --- Vulnerabilidad 1: Inyección SQL (consulta concatenada) ---
-    query = "SELECT * FROM users WHERE username = '" + username + "' AND password = '" + password + "'"
+    cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
     conn = get_db()
     cursor = conn.execute(query)
     user = cursor.fetchone()
