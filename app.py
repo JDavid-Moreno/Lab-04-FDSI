@@ -1,5 +1,5 @@
 """
-App de demostración - INTENCIONALMENTE VULNERABLE
+App de demostración - arreglos de vulnerabilidades de seguridad
 Uso exclusivo para laboratorio de detección con herramientas SAST.
 NO desplegar en producción ni exponer a internet.
 """
@@ -29,11 +29,12 @@ def login():
     username = request.form["username"]
     password = request.form["password"]
 
-    # --- Vulnerabilidad 1: Inyección SQL (consulta concatenada) ---
-    cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
+    # --- S-01 CORREGIDO: Consulta parametrizada segura contra Inyección SQL ---
     conn = get_db()
-    cursor = conn.execute(query)
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = ? AND password = ?", (username, password))
     user = cursor.fetchone()
+    conn.close()
 
     return {"ok": user is not None}
 
@@ -51,6 +52,7 @@ def register():
         "INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed)
     )
     conn.commit()
+    conn.close()
     return {"ok": True}
 
 
