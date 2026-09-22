@@ -51,3 +51,15 @@ para ver los hallazgos con Bandit toca realizar en el CMD o en GitBash:
     ```
 
 Con ello, se verán todos los hallazgos vulnerables encontrados en la app que se clasificaron en el documento
+
+---
+
+## Correcciones Para un Build Success
+
+el código de la app con todas las vulnerabilidades se encuentra en [Original.md](/original.md)
+
+Al finalizar todas las correcciones de los hallazgos vulnerables, terminamos con un escaneo en snyk totalmente correcto y un build success en git
+
+![analisys](/img/analisis.png)
+
+![check](/img/checks.png)
