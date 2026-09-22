@@ -13,8 +13,8 @@ from flask import Flask, request
 
 app = Flask(__name__)
 
-# --- Vulnerabilidad 3: Secreto / API key codificada en el código ---
-API_KEY = "sk_live_51Hc3jFakeKeyDoNotUse1234567890"
+# --- S-03 / Vulnerabilidad 3 CORREGIDA: Secreto cargado desde variable de entorno ---
+API_KEY = os.environ.get("API_KEY", "key_no_disponible_en_codigo")
 
 
 def get_db():
@@ -45,8 +45,8 @@ def register():
     username = request.form["username"]
     password = request.form["password"]
 
-    # --- Vulnerabilidad 4: Hash débil (MD5) para contraseñas ---
-    hashed = hashlib.md5(password.encode()).hexdigest()
+    # --- Vulnerabilidad 4 CORREGIDA (Hash débil MD5 -> SHA-256) ---
+    hashed = hashlib.sha256(password.encode()).hexdigest()
 
     conn = get_db()
     conn.execute(
@@ -63,7 +63,6 @@ def ping():
 
     # --- S-02 CORREGIDO: Uso seguro de subprocess en lugar de os.system ---
     try:
-        # Ejecutar ping pasando los argumentos como lista para evitar inyección de comandos en shell
         result = subprocess.run(["ping", "-c", "1", host], capture_output=True, text=True, timeout=5)
         return {"output": result.stdout, "exit_code": result.returncode}
     except Exception as e:
